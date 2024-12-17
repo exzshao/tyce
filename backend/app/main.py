@@ -10,15 +10,6 @@ import os
 load_dotenv()
 app = FastAPI()
 
-# Allow frontend to connect to backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Setup AI model
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 model = genai.GenerativeModel('gemini-1.5-flash')
