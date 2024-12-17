@@ -24,7 +24,7 @@ type Message = {
 
 export default function SalesAssistant() {
   const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [uploadMessage, setUploadMessage] = useState("")
   const [messages, setMessages] = useState<Message[]>([])

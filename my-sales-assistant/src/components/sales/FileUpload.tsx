@@ -1,10 +1,9 @@
 import { Input } from "@/components/ui/input"
 import { Upload } from 'lucide-react'
 import { Button } from "@/components/ui/button"
-import { RefObject } from 'react'
 
 interface FileUploadProps {
-  fileInputRef: RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   uploadMessage: string
   selectedFiles: File[]
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void

@@ -16,7 +16,7 @@ export function Header() {
 
       {/* Welcome Message */}
       <div className="space-y-2 text-center">
-        <h1 className="text-xl font-medium">Hi Kim, I&apos;m Tyce, your Sales Partner.</h1>
+        <h1 className="text-xl font-medium">Hi, I&apos;m Tyce, your Sales Partner.</h1>
         <p className="text-muted-foreground">I&apos;m here to help you sell projects.</p>
       </div>
 
