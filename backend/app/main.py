@@ -1,6 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional, List
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
@@ -32,54 +33,45 @@ try:
 except Exception as e:
     print(f"Error configuring Gemini AI: {e}")
 
+class FileContent(BaseModel):
+    name: str
+    content: str
+
+class ChatRequest(BaseModel):
+    message: str
+    files: Optional[List[FileContent]] = None
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
 @app.post("/chat")
-async def chat(
-    message: str = Form(...),
-    file: Optional[UploadFile] = File(None)
-):
+async def chat(request: ChatRequest):
     try:
-        # Initialize content with the message
-        content = message
-
-        # If file is provided, process it
-        if file:
-            if not file.filename.endswith('.txt'):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Only .txt files are supported"
-                )
-            
-            # Read and decode file content
-            file_content = await file.read()
-            try:
-                file_text = file_content.decode('utf-8')
-            except UnicodeDecodeError:
-                try:
-                    file_text = file_content.decode('latin-1')
-                except UnicodeDecodeError:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Unable to decode file. Please ensure it's a valid text file."
-                    )
-            
-            # Combine message with file content
-            content = f"{message}\n\nFile Content:\n{file_text}"
-
+        print("Received request:", request.dict())  # Debug log
+        
+        # Prepare the prompt with file contents if any
+        prompt = request.message
+        if request.files:
+            print(f"Processing {len(request.files)} files")  # Debug log
+            prompt += "\n\nHere are the contents of the uploaded files:\n"
+            for file in request.files:
+                print(f"Adding file {file.name} to prompt")  # Debug log
+                prompt += f"\n--- {file.name} ---\n{file.content}\n"
+        
+        print("Final prompt:", prompt)  # Debug log
+        
         # Generate response using Gemini
-        response = model.generate_content(content)
+        response = model.generate_content(prompt)
         
         return {
-            "message": message,
-            "file_name": file.filename if file else None,
-            "ai_response": response.text
+            "message": response.text
         }
     except Exception as e:
+        print(f"Error in chat endpoint: {str(e)}")  # Debug log
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
